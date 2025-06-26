@@ -102,6 +102,11 @@ function detectarSaludo(mensaje) {
   return null;
 }
 
+// Utilidad para agregar el emoji de mariposa a 'Anie'
+function anieConMariposa(texto) {
+  return texto.replace(/Anie/gi, match => match + ' 🦋');
+}
+
 // Función principal de respuesta con máquina de estados
 function generarRespuesta(mensaje, sessionId) {
   const estadoActual = sessionStates[sessionId] || 'start';
@@ -217,7 +222,7 @@ app.post('/api/chat', (req, res) => {
       const currentSessionId = sessionId || uuidv4();
       sessionStates[currentSessionId] = 'start';
       return res.json({
-        reply: saludo.respuesta,
+        reply: anieConMariposa(saludo.respuesta),
         options: saludo.options,
         nextState: saludo.nextState,
         sessionId: currentSessionId
@@ -230,22 +235,26 @@ app.post('/api/chat', (req, res) => {
     // Generar respuesta
     const respuesta = generarRespuesta(message, currentSessionId);
     
+    // Agregar emoji a la respuesta del bot
+    const respuestaBot = anieConMariposa(respuesta.respuesta);
+    
     // Guardar en historial
     const registro = {
       id: uuidv4(),
       user: message,
-      bot: respuesta.respuesta,
+      bot: respuestaBot,
       timestamp: new Date().toISOString(),
       state: respuesta.nextState,
       sessionId: currentSessionId
     };
+    // No guardar __init__ en historial (ya controlado arriba)
     historial.push(registro);
     
     console.log(`[${registro.timestamp}] Sesión: ${currentSessionId} | Usuario: ${message}`);
-    console.log(`[${registro.timestamp}] Anie: ${respuesta.respuesta} | Estado: ${respuesta.nextState}`);
+    console.log(`[${registro.timestamp}] Anie: ${respuestaBot} | Estado: ${respuesta.nextState}`);
     
     return res.json({
-      reply: respuesta.respuesta,
+      reply: respuestaBot,
       options: respuesta.options || [],
       nextState: respuesta.nextState,
       sessionId: currentSessionId
