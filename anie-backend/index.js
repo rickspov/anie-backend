@@ -207,6 +207,23 @@ app.post('/api/chat', (req, res) => {
       return res.status(400).json({ error: 'El mensaje es requerido y debe ser un string no vacío.' });
     }
     
+    // Manejo especial para __init__
+    if (message === '__init__') {
+      const saludo = {
+        respuesta: '¡Hola! 😄 Soy Anie, ¿cómo te sientes hoy?',
+        options: ['Bien 😊', 'Regular 😐', 'Triste 😔', 'Ansioso 😰'],
+        nextState: 'start'
+      };
+      const currentSessionId = sessionId || uuidv4();
+      sessionStates[currentSessionId] = 'start';
+      return res.json({
+        reply: saludo.respuesta,
+        options: saludo.options,
+        nextState: saludo.nextState,
+        sessionId: currentSessionId
+      });
+    }
+    
     // Generar sessionId si no existe
     const currentSessionId = sessionId || uuidv4();
     
