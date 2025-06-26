@@ -164,27 +164,59 @@ function generarRespuesta(mensaje, sessionId) {
   // Si estamos en estado de programación
   if (estadoActual === 'schedule') {
     const texto = normalizar(mensaje);
-    if (texto.includes('hoy') || texto.includes('ahora')) {
-      sessionStates[sessionId] = 'end';
+    
+    // Si ya eligió fecha, preguntar por modalidad
+    if (sessionStates[sessionId + '_fecha']) {
+      if (texto.includes('online') || texto.includes('virtual') || texto.includes('zoom')) {
+        sessionStates[sessionId] = 'end';
+        return {
+          respuesta: '¡Perfecto! Te he programado una sesión online. Te redirigiré al formulario para completar los detalles de tu cita. ¡Gracias por confiar en mí! 🦋',
+          options: ['Ir al formulario'],
+          nextState: 'end'
+        };
+      }
+      
+      if (texto.includes('presencial') || texto.includes('cara a cara') || texto.includes('oficina')) {
+        sessionStates[sessionId] = 'end';
+        return {
+          respuesta: '¡Excelente! Te he programado una sesión presencial. Te redirigiré al formulario para completar los detalles de tu cita. ¡Gracias por confiar en mí! 🦋',
+          options: ['Ir al formulario'],
+          nextState: 'end'
+        };
+      }
+      
       return {
-        respuesta: '¡Perfecto! Te he programado una sesión para hoy. Te contactaré pronto. ¡Cuídate mucho! 🦋',
-        nextState: 'end'
+        respuesta: '¿Prefieres que la sesión sea online o presencial?',
+        options: ['Online', 'Presencial'],
+        nextState: 'schedule'
+      };
+    }
+    
+    // Primera parte: elegir fecha
+    if (texto.includes('hoy') || texto.includes('ahora')) {
+      sessionStates[sessionId + '_fecha'] = 'hoy';
+      return {
+        respuesta: '¡Perfecto! ¿Prefieres que la sesión sea online o presencial?',
+        options: ['Online', 'Presencial'],
+        nextState: 'schedule'
       };
     }
     
     if (texto.includes('mañana')) {
-      sessionStates[sessionId] = 'end';
+      sessionStates[sessionId + '_fecha'] = 'mañana';
       return {
-        respuesta: '¡Genial! Te he programado una sesión para mañana. Te contactaré para confirmar. ¡Que tengas un buen día! 🦋',
-        nextState: 'end'
+        respuesta: '¡Genial! ¿Prefieres que la sesión sea online o presencial?',
+        options: ['Online', 'Presencial'],
+        nextState: 'schedule'
       };
     }
     
     if (texto.includes('semana')) {
-      sessionStates[sessionId] = 'end';
+      sessionStates[sessionId + '_fecha'] = 'esta semana';
       return {
-        respuesta: '¡Perfecto! Te he programado una sesión para esta semana. Te contactaré con los detalles. ¡Gracias por confiar en mí! 🦋',
-        nextState: 'end'
+        respuesta: '¡Perfecto! ¿Prefieres que la sesión sea online o presencial?',
+        options: ['Online', 'Presencial'],
+        nextState: 'schedule'
       };
     }
     
