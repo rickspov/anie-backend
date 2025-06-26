@@ -262,11 +262,11 @@ app.get('/api/history', (req, res) => {
   }
 });
 
-// Exportar app para Render
+// Exporta app para Render
 export default app;
 
-// Solo escuchar si no está en modo importado
-if (process.env.RENDER !== 'true') {
+// Solo escucha el puerto si el archivo es ejecutado directamente (no importado)
+if (process.env.NODE_ENV !== 'test') {
   app.listen(port, () => {
     console.log(`Anie backend escuchando en puerto ${port}`);
   });
